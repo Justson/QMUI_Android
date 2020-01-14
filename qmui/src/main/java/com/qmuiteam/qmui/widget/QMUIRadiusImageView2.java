@@ -471,6 +471,9 @@ public class QMUIRadiusImageView2 extends AppCompatImageView implements IQMUILay
     @Override
     public void setSelected(boolean selected) {
         super.setSelected(selected);
+    }
+
+    private void setSelectedState(boolean selected) {
         if (mIsSelected != selected) {
             mIsSelected = selected;
             if (mIsSelected) {
@@ -527,13 +530,13 @@ public class QMUIRadiusImageView2 extends AppCompatImageView implements IQMUILay
         }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                this.setSelected(true);
+                this.setSelectedState(true);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_SCROLL:
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_CANCEL:
-                this.setSelected(false);
+                this.setSelectedState(false);
                 break;
         }
         return super.onTouchEvent(event);

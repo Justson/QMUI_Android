@@ -19,6 +19,7 @@ package com.qmuiteam.qmuidemo.fragment.components;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.qmuiteam.qmui.widget.QMUIRadiusImageView2;
 import com.qmuiteam.qmui.widget.QMUITopBarLayout;
@@ -70,6 +71,20 @@ public class QDRadiusImageView2ScaleTypeFragment extends BaseFragment {
                         showBottomSheetList();
                     }
                 });
+
+        mRadius2ImageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), "onClick", Toast.LENGTH_SHORT).show();
+            }
+        });
+        mRadius2ImageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Toast.makeText(getActivity(), "onLongClick", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+        });
     }
 
     private void showBottomSheetList() {
