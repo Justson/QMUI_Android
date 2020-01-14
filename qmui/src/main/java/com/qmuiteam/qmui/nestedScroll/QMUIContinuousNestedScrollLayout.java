@@ -51,6 +51,7 @@ public class QMUIContinuousNestedScrollLayout extends CoordinatorLayout implemen
     };
     private boolean mKeepBottomAreaStableWhenCheckLayout = false;
     private QMUIDraggableScrollBar mDraggableScrollBar;
+    private boolean mEnableScrollBarFadeInOut = true;
     private boolean mIsDraggableScrollBarEnabled = false;
     private int mCurrentScrollState = IQMUIContinuousNestedScrollCommon.SCROLL_STATE_IDLE;
     private boolean mIsDismissDownEvent = false;
@@ -72,6 +73,7 @@ public class QMUIContinuousNestedScrollLayout extends CoordinatorLayout implemen
     private void ensureScrollBar() {
         if (mDraggableScrollBar == null) {
             mDraggableScrollBar = createScrollBar(getContext());
+            mDraggableScrollBar.setEnableFadeInAndOut(mEnableScrollBarFadeInOut);
             mDraggableScrollBar.setCallback(this);
             CoordinatorLayout.LayoutParams lp = new CoordinatorLayout.LayoutParams(
                     ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -81,7 +83,32 @@ public class QMUIContinuousNestedScrollLayout extends CoordinatorLayout implemen
     }
 
     public void setDraggableScrollBarEnabled(boolean draggableScrollBarEnabled) {
-        mIsDraggableScrollBarEnabled = draggableScrollBarEnabled;
+        if(mIsDraggableScrollBarEnabled != draggableScrollBarEnabled){
+            mIsDraggableScrollBarEnabled = draggableScrollBarEnabled;
+            if(mIsDraggableScrollBarEnabled && !mEnableScrollBarFadeInOut){
+                ensureScrollBar();
+                mDraggableScrollBar.setPercent(getCurrentScrollPercent());
+                mDraggableScrollBar.awakenScrollBar();
+            }
+            if(mDraggableScrollBar != null){
+                mDraggableScrollBar.setVisibility(draggableScrollBarEnabled ? View.VISIBLE: View.GONE);
+            }
+        }
+    }
+
+    public void setEnableScrollBarFadeInOut(boolean enableScrollBarFadeInOut) {
+        if(mEnableScrollBarFadeInOut != enableScrollBarFadeInOut){
+            mEnableScrollBarFadeInOut = enableScrollBarFadeInOut;
+            if(mIsDraggableScrollBarEnabled && !mEnableScrollBarFadeInOut){
+                ensureScrollBar();
+                mDraggableScrollBar.setPercent(getCurrentScrollPercent());
+                mDraggableScrollBar.awakenScrollBar();
+            }
+            if(mDraggableScrollBar != null){
+                mDraggableScrollBar.setEnableFadeInAndOut(enableScrollBarFadeInOut);
+                mDraggableScrollBar.invalidate();
+            }
+        }
     }
 
     protected QMUIDraggableScrollBar createScrollBar(Context context) {
@@ -322,20 +349,29 @@ public class QMUIContinuousNestedScrollLayout extends CoordinatorLayout implemen
 
         }
         for (OnScrollListener onScrollListener : mOnScrollListeners) {
-            onScrollListener.onScroll(topCurrent, topRange, offsetCurrent, offsetRange,
+            onScrollListener.onScroll(this, topCurrent, topRange, offsetCurrent, offsetRange,
                     bottomCurrent, bottomRange);
+        }
+    }
+
+    @Override
+    public void onNestedScroll(View target, int dxConsumed, int dyConsumed, int dxUnconsumed, int dyUnconsumed, int type) {
+        super.onNestedScroll(target, dxConsumed, dyConsumed, dxUnconsumed, dyUnconsumed, type);
+        if(dyUnconsumed > 0 && getCurrentScroll() >= getScrollRange()){
+            // RecyclerView does not stop scroller when over scroll with NestedScrollingParent
+            stopScroll();
         }
     }
 
     private void dispatchScrollStateChange(int newScrollState, boolean fromTopBehavior) {
         for (OnScrollListener onScrollListener : mOnScrollListeners) {
-            onScrollListener.onScrollStateChange(newScrollState, fromTopBehavior);
+            onScrollListener.onScrollStateChange(this, newScrollState, fromTopBehavior);
         }
         mCurrentScrollState = newScrollState;
     }
 
     public void scrollBy(int dy) {
-        if (dy > 0 && mTopAreaBehavior != null) {
+        if ((dy > 0 || mBottomView == null) && mTopAreaBehavior != null) {
             mTopAreaBehavior.scroll(this, ((View) mTopView), dy);
         } else if (dy != 0 && mBottomView != null) {
             mBottomView.consumeScroll(dy);
@@ -346,7 +382,7 @@ public class QMUIContinuousNestedScrollLayout extends CoordinatorLayout implemen
         if (dy == 0) {
             return;
         }
-        if (dy > 0 && mTopAreaBehavior != null) {
+        if ((dy > 0 || mBottomView == null) && mTopAreaBehavior != null) {
             mTopAreaBehavior.smoothScrollBy(this, ((View) mTopView), dy, duration);
         } else if (mBottomView != null) {
             mBottomView.smoothScrollYBy(dy, duration);
@@ -516,10 +552,10 @@ public class QMUIContinuousNestedScrollLayout extends CoordinatorLayout implemen
 
     public interface OnScrollListener {
 
-        void onScroll(int topCurrent, int topRange,
+        void onScroll(QMUIContinuousNestedScrollLayout scrollLayout, int topCurrent, int topRange,
                       int offsetCurrent, int offsetRange,
                       int bottomCurrent, int bottomRange);
 
-        void onScrollStateChange(int newScrollState, boolean fromTopBehavior);
+        void onScrollStateChange(QMUIContinuousNestedScrollLayout scrollLayout, int newScrollState, boolean fromTopBehavior);
     }
 }

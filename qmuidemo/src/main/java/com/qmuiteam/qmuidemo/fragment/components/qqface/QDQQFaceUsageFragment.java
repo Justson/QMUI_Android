@@ -16,9 +16,16 @@
 
 package com.qmuiteam.qmuidemo.fragment.components.qqface;
 
+import android.graphics.Color;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Toast;
 
+import com.qmuiteam.qmui.span.QMUITouchableSpan;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.QMUITopBar;
 import com.qmuiteam.qmuidemo.manager.QDDataManager;
 import com.qmuiteam.qmuidemo.base.BaseFragment;
@@ -50,6 +57,11 @@ public class QDQQFaceUsageFragment extends BaseFragment {
     @BindView(R.id.qqface11) QDQQFaceView mQQFace11;
     @BindView(R.id.qqface12) QDQQFaceView mQQFace12;
     @BindView(R.id.qqface13) QDQQFaceView mQQFace13;
+    @BindView(R.id.qqface14) QDQQFaceView mQQFace14;
+    @BindView(R.id.qqface15) QDQQFaceView mQQFace15;
+    @BindView(R.id.qqface16) QDQQFaceView mQQFace16;
+    @BindView(R.id.qqface17) QDQQFaceView mQQFace17;
+    @BindView(R.id.qqface18) QDQQFaceView mQQFace18;
 
     @Override
     protected View onCreateView() {
@@ -119,5 +131,39 @@ public class QDQQFaceUsageFragment extends BaseFragment {
                 "[微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑]" +
                 "[微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑][微笑]" +
                 "[微笑][微笑][微笑][微笑][微笑]");
+
+        String topic = "#[发呆][微笑]话题";
+        String text = "这是一段文本，为了测量 span 的点击在不同 Gravity 下能否正常工作。" + topic;
+
+
+        SpannableString sb = new SpannableString(text);
+        QMUITouchableSpan span = new QMUITouchableSpan(Color.BLUE, Color.BLACK, Color.GRAY, Color.GREEN) {
+            @Override
+            public void onSpanClick(View widget) {
+                Toast.makeText(widget.getContext(), "点击了话题", Toast.LENGTH_SHORT).show();
+            }
+        };
+        span.setIsNeedUnderline(true);
+        sb.setSpan(span, text.indexOf(topic), text.indexOf(topic) + topic.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        mQQFace14.setLinkUnderLineColor(Color.RED);
+        mQQFace14.setLinkUnderLineHeight(QMUIDisplayHelper.dp2px(getContext(), 2));
+        mQQFace14.setText(sb);
+        mQQFace15.setText(sb);
+        mQQFace15.setLinkUnderLineColor(Color.RED);
+        mQQFace16.setText(sb);
+        mQQFace16.setLinkUnderLineHeight(QMUIDisplayHelper.dp2px(getContext(), 4));
+        mQQFace16.setLinkUnderLineColor(Color.RED);
+        mQQFace15.setGravity(Gravity.CENTER);
+        mQQFace16.setGravity(Gravity.RIGHT);
+
+        mQQFace17.setLinkUnderLineColor(Color.RED);
+        mQQFace17.setNeedUnderlineForMoreText(true);
+        mQQFace17.setText("这是一段文本，为了测量更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多" +
+                "更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多" +
+                "更多更多更多更多更多更多更多更多更多更多更多更多更多更多更多的显示情况");
+
+        mQQFace18.setParagraphSpace(QMUIDisplayHelper.dp2px(getContext(), 20));
+        mQQFace18.setText("这是一段文本，为[微笑]了测量多段落[微笑]\n" +
+                "这是一段文本，为[微笑]了测量多段落[微笑]\n这是一段文本，为[微笑]了测量多段落[微笑]");
     }
 }
